@@ -1,0 +1,11 @@
+{
+  "task_id": "xarray-b3f5db3728",
+  "repo": "pydata/xarray",
+  "commit": "b3f5db3728422b918d514b250d1d78a8cfabf8f6",
+  "parent": "9bee765f8846194778c7069bc913c07c83e7443c",
+  "ai_tool": "Claude",
+  "text_source": "pr_description",
+  "clarity": "clear",
+  "status": "usable",
+  "drop_reason": null
+}

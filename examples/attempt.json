@@ -1,0 +1,13 @@
+{
+  "task_id": "xarray-b3f5db3728",
+  "model_requested": "qwen3.8-27b",
+  "model_served": "qwen3.8-27b",
+  "host": "runpod",
+  "ended": "finished",
+  "steps": 31,
+  "minutes": 22.4,
+  "tokens_in": 540000,
+  "tokens_out": 21000,
+  "cost_usd": 0.0,
+  "gpu_hours": 0.37
+}

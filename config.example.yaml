@@ -1,0 +1,30 @@
+# Copy to config.yaml (git ignores it) and edit.
+repo_path: ../xarray
+run_dir: runs/run-01
+
+# Same budgets for every model (guide step 4).
+budgets:
+  max_steps: 50
+  max_minutes: 60
+  max_cost_usd: 2.0
+  command_timeout_seconds: 180
+
+sandbox:
+  image: gauge-xarray
+  memory: 4g
+  cpus: 2
+  user: "1000:1000"
+  network: none
+
+# Models the run uses, by name from the list below.
+run_models:
+  - qwen3.8-27b
+
+models:
+  qwen3.8-27b:
+    base_url: https://<your-runpod-pod>/v1
+    api_key_env: RUNPOD_KEY
+    price_in_per_m: 0
+    price_out_per_m: 0
+    gpu_price_per_hour: 1.09
+    temperature: 0.6

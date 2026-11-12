@@ -1,0 +1,10 @@
+{
+  "task_id": "xarray-b3f5db3728",
+  "test_patch": "tests.patch",
+  "hidden_tests": [
+    "xarray.tests.test_variable::test_explicitly_indexed_array_preserved"
+  ],
+  "existing_tests_to_check": [
+    "xarray/tests/test_variable.py"
+  ]
+}

@@ -1,0 +1,16 @@
+# secrets
+.env
+# python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+*.egg-info/
+# run outputs (large, regenerated)
+runs/
+# local config with real endpoints
+config.yaml
+# editors / OS
+.vscode/
+.idea/
+.DS_Store
