@@ -10,17 +10,19 @@ The build guide (what each part does, step by step) is in the team's
 
 ## Parts and owners
 
-| Folder | Part | Owner | Guide step |
-| --- | --- | --- | --- |
-| `sandbox/` | Sandbox and test runner | Neetu (container), Keerthana (test logic) | 1 |
-| `gateway/` | Model gateway | Neetu | 2 |
-| `agent/` | Coding agent | Neetu | 3 |
-| `orchestrator/` | Orchestrator | Keerthana (tech lead) | 4 |
-| `finder/` | Task finder | Hanisha | 5 |
-| `writer/` | Task writer | Zayna | 6 |
-| `reporter/` | Reporter | Varsha, with Keerthana | 7 |
-| `examples/` | Example files every part reads and writes | Everyone | — |
-| `tests/` | Our own tests for the parts above | Everyone | — |
+Each owner creates their part's folder. The first file in it is `SPEC.md`, approved in a
+pull request before any code is written (see the build guide).
+
+| Folder to create | Part | Owner |
+| --- | --- | --- |
+| `sandbox/` | Sandbox and test runner | Neetu (container), Keerthana (test logic) |
+| `gateway/` | Model gateway | Neetu |
+| `agent/` | Coding agent | Hanisha |
+| `orchestrator/` (exists) | Orchestrator | Keerthana |
+| `task_builder/` | Task builder (finds tasks, writes what the model is told) | Zayna |
+| `reporter/` | Reporter | Varsha |
+
+Shared by everyone: `examples/` (the file formats parts pass to each other) and `tests/`.
 
 ## Setup
 
@@ -44,15 +46,15 @@ in the formats shown in `examples/`. Change those formats only by team agreement
 ```text
 runs/<run-id>/
   config.yaml
-  candidates.jsonl                 finder/
+  candidates.jsonl                 task builder
   tasks/<task-id>/
-    task.md, task.meta.json        writer/
-    answer_key.json                sandbox/ (answer-key mode)
+    task.md, task.meta.json        task builder
+    answer_key.json                sandbox (answer-key mode)
     attempts/<model>/
-      patch.diff, transcript.jsonl agent/
-      attempt.json                 orchestrator/
-      result.json                  sandbox/ (grade mode)
-  report/                          reporter/
+      patch.diff, transcript.jsonl coding agent
+      attempt.json                 orchestrator
+      result.json                  sandbox (grade mode)
+  report/                          reporter
 ```
 
 ## Team rules
