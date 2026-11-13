@@ -19,7 +19,7 @@ pull request before any code is written (see the build guide).
 | `gateway/` | Model gateway | Neetu |
 | `agent/` | Coding agent | Hanisha |
 | `orchestrator/` (exists) | Orchestrator | Keerthana |
-| `task_builder/` | Task builder (finds and picks tasks, writes what the model is told) | Hanisha (finding, Area A), Zayna (choosing and research, Area E) |
+| `task_builder/` | Task builder agent (turns commits into fair tasks) | Hanisha (finding, Area A), Zayna (choosing and research, Area E) |
 | `reporter/` | Reporter | Varsha |
 
 Shared by everyone: `examples/` (the file formats parts pass to each other) and `tests/`.
