@@ -1,6 +1,6 @@
 # Orchestrator (guide step 4)
 
-**Owner:** Keerthana (tech lead).
+**Owner:** Keerthana.
 
 One command that runs every task for every model, in order, and can resume. No AI in it.
 
