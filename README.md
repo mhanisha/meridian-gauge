@@ -15,9 +15,9 @@ pull request before any code is written (see the build guide).
 
 | Folder to create | Part | Owner |
 | --- | --- | --- |
-| `sandbox/` | Sandbox and test runner | Neetu (container), Keerthana (test logic) |
-| `gateway/` | Model gateway | Neetu |
-| `agent/` | Coding agent | Hanisha |
+| `sandbox/` | Sandbox and test runner | Neetu |
+| `gateway/` | Model gateway | Hanisha |
+| `agent/` | Coding agent | Keerthana |
 | `orchestrator/` (exists) | Orchestrator | Keerthana |
 | `task_builder/` | Task builder agent (turns commits into fair tasks) | Hanisha (finding, Area A), Zayna (choosing and research, Area E) |
 | `reporter/` | Reporter | Varsha |
