@@ -1,7 +1,5 @@
 # Orchestrator (guide step 4)
 
-**Owner:** Keerthana.
-
 One command that runs every task for every model, in order, and can resume. No AI in it.
 
 ```bash
