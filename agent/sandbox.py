@@ -1,7 +1,7 @@
 """How the agent reaches the sandbox.
 
 The agent only needs three things from a sandbox: run a command, read a file, write a file.
-Starting and deleting containers is the sandbox part's job (part 1, Neetu); the agent attaches
+Starting and deleting containers is the sandbox part's job (part 1); the agent attaches
 to a container that is already running, with the repo copy at /work/repo.
 """
 from __future__ import annotations

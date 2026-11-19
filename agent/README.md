@@ -1,7 +1,22 @@
 # Coding agent (part 3)
 
-**Owner:** Keerthana. The thing Meridian Gauge measures: one model, one task, five tools,
-inside the sandbox. See [`SPEC.md`](SPEC.md) for what it does and why.
+The thing Meridian Gauge measures: one model, one task, five tools,
+inside the sandbox. [`SPEC.md`](SPEC.md) holds the instructions, tools, rules and limits
+every model gets.
+
+It does not start or delete sandboxes, save the code changes, or grade anything. The
+orchestrator and the sandbox (part 1) do those.
+
+## What it reads and writes
+
+| | What | Format |
+| --- | --- | --- |
+| Reads | The task | `task.md` (see `examples/task.md`) |
+| Reads | A running sandbox | A container started by the sandbox part, with the repo copy at `/work/repo` |
+| Reads | A model to talk to | Anything with `chat(messages, tools)` (the gateway, once ready) |
+| Reads | Limits | `budgets` in `config.yaml` |
+| Writes | The conversation | `transcript.jsonl`, saved after every message |
+| Writes | How the attempt ended | The agent's fields of `attempt.json`: `model_requested`, `model_served`, `ended`, `steps`, `minutes`, `tokens_in`, `tokens_out`, `cost_usd` |
 
 | File | What it holds |
 | --- | --- |

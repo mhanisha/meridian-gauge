@@ -8,19 +8,19 @@ alongside the original change.
 The build guide (what each part does, step by step) is in the team's
 [Meridian Gauge — Team Build Guide](https://claude.ai/artifact/1xNchZGSHAxETLbTxS13mB). Read it before writing code.
 
-## Parts and owners
+## Parts
 
-Each owner creates their part's folder. The first file in it is `SPEC.md`, approved in a
-pull request before any code is written (see the build guide).
+Each part has its own folder. The first file in a new part's folder is `SPEC.md`, approved in
+a pull request before any code is written (see the build guide).
 
-| Folder to create | Part | Owner |
-| --- | --- | --- |
-| `sandbox/` | Sandbox and test runner | Neetu |
-| `gateway/` | Model gateway | Hanisha |
-| `agent/` | Coding agent | Keerthana |
-| `orchestrator/` (exists) | Orchestrator | Keerthana |
-| `task_builder/` | Task builder agent (turns commits into fair tasks) | Hanisha (finding, Area A), Zayna (choosing and research, Area E) |
-| `reporter/` | Reporter | Varsha |
+| Folder | Part |
+| --- | --- |
+| `sandbox/` | Sandbox and test runner |
+| `gateway/` | Model gateway |
+| `agent/` (exists) | Coding agent |
+| `orchestrator/` (exists) | Orchestrator |
+| `task_builder/` | Task builder agent (turns commits into fair tasks) |
+| `reporter/` | Reporter |
 
 Shared by everyone: `examples/` (the file formats parts pass to each other) and `tests/`.
 

@@ -1,4 +1,4 @@
-"""Entry point: python -m orchestrator config.yaml (owner: Keerthana). Guide step 4."""
+"""Entry point: python -m orchestrator config.yaml. Guide step 4."""
 import sys
 
 

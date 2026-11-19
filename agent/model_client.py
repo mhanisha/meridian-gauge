@@ -1,6 +1,6 @@
 """How the agent talks to a model.
 
-The loop depends only on the ModelClient interface: one `chat(messages, tools)` method. Hanisha's
+The loop depends only on the ModelClient interface: one `chat(messages, tools)` method. The
 model gateway (part 2) will provide this. Until it is ready, OpenAICompatibleClient reaches any
 OpenAI-compatible host directly (vLLM, RunPod, OpenRouter, Groq, Hugging Face) so the agent can
 be built and tried now. Swap it for the gateway without touching the loop.
