@@ -1,9 +1,10 @@
 # Meridian Gauge
 
-Tests whether open-weight AI models can do a team's real coding work as well as a commercial
-assistant. It replays coding tasks that were already done with AI help in a repository, gives
+Given a repo, identifies which open weight models can solve bugs instead of using commercial agents on everything. 
+
+It replays coding tasks that were already done with AI help in a repository, gives
 each model the same task in a sealed sandbox, and grades the result with the tests written
-alongside the original change.
+alongside the original change. This helps in creating and extending rules that can used for efficient token routing.
 
 The build guide (what each part does, step by step) is in the team's
 [Meridian Gauge — Team Build Guide](https://claude.ai/artifact/1xNchZGSHAxETLbTxS13mB). Read it before writing code.
