@@ -55,6 +55,7 @@ class AttemptResult:
     messages: list[dict] = field(default_factory=list)
     summary: str = ""
     error: str = ""
+    waited_minutes: float = 0.0  # time spent waiting out rate limits (included in `minutes`)
 
     def attempt_fields(self) -> dict:
         """The agent's share of attempt.json (the orchestrator adds task_id, host, gpu_hours)."""
@@ -87,14 +88,20 @@ def run_attempt(task_md: str, sandbox: Sandbox, client: ModelClient, limits: Lim
         if on_message:
             on_message(message)
 
+    def waited() -> float:
+        """Seconds the client spent waiting out rate limits. They do not count towards the
+        time limit, so a busy host does not cost the model its working time."""
+        return float(getattr(client, "waited_seconds", 0) or 0)
+
     def out_of_time() -> bool:
-        return clock() - start >= limits.max_minutes * 60
+        return clock() - start - waited() >= limits.max_minutes * 60
 
     def done(ended: str, summary: str = "", error: str = "") -> AttemptResult:
         return AttemptResult(ended=ended, steps=steps, minutes=(clock() - start) / 60,
                              tokens_in=tokens_in, tokens_out=tokens_out, cost_usd=cost,
                              model_requested=client.model_name, model_served=served,
-                             messages=messages, summary=summary, error=error)
+                             messages=messages, summary=summary, error=error,
+                             waited_minutes=waited() / 60)
 
     add({"role": "system", "content": SYSTEM_PROMPT})
     add({"role": "user", "content": task_md})

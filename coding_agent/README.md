@@ -31,7 +31,7 @@ orchestrator and the sandbox (part 1) do those.
 Needs a running sandbox container (part 1) and a model listed in `config.yaml`.
 
 ```bash
-python -m agent --config config.yaml --model qwen3.8-27b \
+python -m coding_agent --config config.yaml --model qwen3.8-27b \
     --task examples/task.md --container gauge-try-1 --out runs/try-1
 ```
 
@@ -39,7 +39,14 @@ It writes `runs/try-1/transcript.jsonl` (saved as it goes) and `runs/try-1/attem
 Saving the code changes as `patch.diff` and grading them are the orchestrator's and the
 sandbox's jobs.
 
+If the host is rate-limited or briefly down (429, 5xx, timeouts, dropped connections), each
+model call waits and tries again: 5, 10, 20, 40, then 60 seconds, or what the host's
+`Retry-After` asks, until `max_retry_wait_seconds` in `budgets` (default 300) is used up.
+Waiting does not count towards `max_minutes`, and the command prints how long it waited.
+Other errors stop at once, such as an unknown model or a used-up daily allowance
+(OpenRouter's `free-models-per-day`), which only resets the next day.
+
 ## Tests
 
-`pytest tests/test_agent.py` runs without Docker or a model: a scripted stand-in model and an
+`pytest tests/test_coding_agent.py` runs without Docker or a model: a scripted stand-in model and an
 in-memory stand-in sandbox check every limit and error path.

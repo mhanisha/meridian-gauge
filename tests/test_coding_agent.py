@@ -5,9 +5,9 @@ import subprocess
 
 import pytest
 
-from agent import (NUDGE, SYSTEM_PROMPT, TOOL_NAMES, CommandResult, DockerSandbox, Limits,
+from coding_agent import (NUDGE, SYSTEM_PROMPT, TOOL_NAMES, CommandResult, DockerSandbox, Limits,
                    ModelReply, ToolCall, run_attempt, safe_path)
-from agent.tools import run_tool, truncate
+from coding_agent.tools import run_tool, truncate
 
 
 # ---------- stand-ins ----------
@@ -277,7 +277,7 @@ def test_docker_sandbox_commands(monkeypatch):
 def test_openai_client_parses_a_reply(monkeypatch):
     openai = pytest.importorskip("openai")
     from openai.types.chat import ChatCompletion
-    from agent import OpenAICompatibleClient
+    from coding_agent import OpenAICompatibleClient
 
     canned = ChatCompletion.model_validate({
         "id": "x", "object": "chat.completion", "created": 0, "model": "qwen3.8-27b",
@@ -308,7 +308,7 @@ def test_openai_client_parses_a_reply(monkeypatch):
 
 def test_command_line_writes_transcript_and_attempt(tmp_path, monkeypatch):
     pytest.importorskip("yaml")
-    import agent.__main__ as cli
+    import coding_agent.__main__ as cli
 
     (tmp_path / "config.yaml").write_text(
         "budgets:\n  max_steps: 7\n"
@@ -337,7 +337,7 @@ def test_command_line_writes_transcript_and_attempt(tmp_path, monkeypatch):
 
 def test_command_line_needs_the_api_key(tmp_path, monkeypatch):
     pytest.importorskip("yaml")
-    import agent.__main__ as cli
+    import coding_agent.__main__ as cli
 
     (tmp_path / "config.yaml").write_text(
         "models:\n  m1:\n    base_url: http://x/v1\n    api_key_env: MISSING_KEY_FOR_TEST\n")
@@ -345,3 +345,99 @@ def test_command_line_needs_the_api_key(tmp_path, monkeypatch):
     with pytest.raises(SystemExit):
         cli.main(["--config", str(tmp_path / "config.yaml"), "--model", "m1", "--task", "t",
                   "--container", "c", "--out", str(tmp_path / "o")])
+
+
+# ---------- waiting out rate limits ----------
+
+from coding_agent.model_client import call_with_retries, wait_before_retry  # noqa: E402
+
+
+class HostError(Exception):
+    def __init__(self, status_code, retry_after=None):
+        super().__init__(f"Error code: {status_code}")
+        self.status_code = status_code
+        self.response = type("R", (), {"headers": {"retry-after": retry_after} if retry_after else {}})()
+
+
+def flaky(failures, result="reply"):
+    """A call that raises each error in `failures` once, then returns `result`."""
+    left = list(failures)
+
+    def fn():
+        if left:
+            raise left.pop(0)
+        return result
+    return fn
+
+
+def test_rate_limit_is_waited_out_then_succeeds():
+    waits = []
+    out = call_with_retries(flaky([HostError(429), HostError(429), HostError(503)]),
+                            max_wait_seconds=300, sleep=waits.append)
+    assert out == "reply"
+    assert waits == [5, 10, 20]  # backs off: 5, 10, 20 seconds
+
+
+def test_gives_up_when_total_wait_would_pass_the_limit():
+    waits = []
+    with pytest.raises(HostError):
+        call_with_retries(flaky([HostError(429)] * 20), max_wait_seconds=60, sleep=waits.append)
+    assert sum(waits) <= 60
+    assert waits == [5, 10, 20]  # the next wait (40) would pass 60, so it stops
+
+
+def test_other_errors_are_not_retried():
+    waits = []
+    with pytest.raises(HostError):  # 404: the model does not exist; waiting will not help
+        call_with_retries(flaky([HostError(404)]), sleep=waits.append)
+    assert waits == []
+
+
+def test_retry_after_header_is_respected_and_capped():
+    assert wait_before_retry(HostError(429, retry_after="7"), retry=1) == 7
+    assert wait_before_retry(HostError(429, retry_after="3600"), retry=1) == 60
+    assert wait_before_retry(HostError(429), retry=6) == 60
+
+
+def test_dropped_connection_is_retried():
+    class APIConnectionError(Exception):
+        pass
+    waits = []
+    assert call_with_retries(flaky([APIConnectionError("reset")]), sleep=waits.append) == "reply"
+    assert waits == [5]
+
+
+def test_real_openai_rate_limit_error_is_recognised():
+    openai = pytest.importorskip("openai")
+    httpx = pytest.importorskip("httpx")
+    req = httpx.Request("POST", "https://example.invalid/v1/chat/completions")
+    resp = httpx.Response(429, headers={"retry-after": "2"}, request=req)
+    err = openai.RateLimitError("Provider returned error", response=resp, body=None)
+    waits = []
+    assert call_with_retries(flaky([err]), sleep=waits.append) == "reply"
+    assert waits == [2]
+
+
+def test_rate_limit_waiting_does_not_count_towards_the_time_limit():
+    class WaitingModel(ScriptedModel):
+        waited_seconds = 0.0
+
+        def chat(self, messages, tools):
+            self.waited_seconds += 15 * 60  # every call spends 15 minutes waiting on the host
+            return super().chat(messages, tools)
+
+    model = WaitingModel(reply(call("read", path="a.py")), reply(call("finish", summary="done")))
+    # Each call takes 16 minutes of clock time, 15 of them waiting: well past 60 minutes in total.
+    r = run_attempt("t", FakeSandbox({"a.py": "x"}), model, Limits(max_minutes=60),
+                    clock=FakeClock(step_seconds=16 * 60))
+    assert r.ended == "finished"
+    assert r.waited_minutes == 30
+
+
+def test_daily_quota_is_not_waited_out():
+    err = HostError(429)
+    err.args = ("Error code: 429 - Rate limit exceeded: free-models-per-day. Add 10 credits",)
+    waits = []
+    with pytest.raises(HostError):
+        call_with_retries(flaky([err]), sleep=waits.append)
+    assert waits == []  # stops at once: the allowance only resets the next day
