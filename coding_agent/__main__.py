@@ -1,6 +1,6 @@
 """Run the coding agent on one task, for trying it out before the orchestrator exists.
 
-    python -m agent --config config.yaml --model qwen3.8-27b \
+    python -m coding_agent --config config.yaml --model qwen3.8-27b \
         --task examples/task.md --container gauge-try-1 --out runs/try-1
 
 The container must already be running (see the sandbox part) with the repo copy at /work/repo.
@@ -20,7 +20,7 @@ from .sandbox import DockerSandbox
 
 
 def main(argv: list[str] | None = None) -> int:
-    p = argparse.ArgumentParser(prog="python -m agent", description=__doc__.splitlines()[0])
+    p = argparse.ArgumentParser(prog="python -m coding_agent", description=__doc__.splitlines()[0])
     p.add_argument("--config", default="config.yaml", help="config file (default: config.yaml)")
     p.add_argument("--model", required=True, help="model name, as listed under models: in the config")
     p.add_argument("--task", required=True, help="path to task.md")
@@ -43,7 +43,10 @@ def main(argv: list[str] | None = None) -> int:
         model_name=a.model, base_url=model_cfg["base_url"], api_key=api_key,
         price_in_per_m=float(model_cfg.get("price_in_per_m", 0)),
         price_out_per_m=float(model_cfg.get("price_out_per_m", 0)),
-        temperature=model_cfg.get("temperature"))
+        temperature=model_cfg.get("temperature"),
+        max_retry_wait_seconds=float((cfg.get("budgets") or {}).get("max_retry_wait_seconds", 300)),
+        on_retry=lambda e, wait: print(f"  {type(e).__name__}; waiting {wait:.0f}s and trying again",
+                                       flush=True))
     limits = Limits.from_config(cfg.get("budgets"))
 
     out = Path(a.out)
@@ -59,6 +62,8 @@ def main(argv: list[str] | None = None) -> int:
     (out / "attempt.json").write_text(json.dumps(result.attempt_fields(), indent=2) + "\n")
     print(f"{a.model}: {result.ended} after {result.steps} steps, {result.minutes:.1f} min, "
           f"{result.tokens_in + result.tokens_out:,} tokens, ${result.cost_usd:.4f}"
+          + (f", {result.waited_minutes:.1f} min of it waiting out rate limits"
+             if result.waited_minutes else "")
           + (f" ({result.error})" if result.error else ""))
     return 0 if result.ended != "error" else 1
 

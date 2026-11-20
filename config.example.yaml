@@ -8,6 +8,7 @@ budgets:
   max_minutes: 60
   max_cost_usd: 2.0
   command_timeout_seconds: 180
+  max_retry_wait_seconds: 300   # per model call: how long to wait out rate limits before giving up
 
 sandbox:
   image: gauge-xarray

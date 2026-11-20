@@ -17,7 +17,7 @@ a pull request before any code is written (see the build guide).
 | --- | --- |
 | `sandbox/` | Sandbox and test runner |
 | `gateway/` | Model gateway |
-| `agent/` (exists) | Coding agent |
+| `coding_agent/` (exists) | Coding agent |
 | `orchestrator/` (exists) | Orchestrator |
 | `task_builder/` | Task builder agent (turns commits into fair tasks) |
 | `reporter/` | Reporter |
